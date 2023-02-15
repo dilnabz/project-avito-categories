@@ -1,29 +1,34 @@
 import React from "react";
-import { Categories } from "./Categories";
-
+import {Categories} from "./Categories";
 
 // descendants
-function getChildrenIds(categories, id) {
-  const { childrenIds } = categories[id];
+function getDescendants(categories, id) {
+  const {childrenIds} = categories[id];
 
-  const allChildrenIds = [];
+  const descendants = [];
 
-  allChildrenIds.push(...childrenIds);
-  childrenIds.forEach(childrenId => {
-    allChildrenIds.push(...getChildrenIds(categories, childrenId));
+  descendants.push(...childrenIds);
+  childrenIds.forEach((childrenId) => {
+    descendants.push(...getDescendants(categories, childrenId));
   });
 
-  return allChildrenIds;
+  return descendants;
 }
 
 // ancestors
 function getAncestors(categories, id, selectedIds) {
-    const { parentId } = categories[id];
-    const siblings = categories[parentId].childrenIds.filter(item => item !== id);
-    if (siblings.every(id => selectedIds.includes(id))) {
-        return [parentId];
-    }
-    return [];
+  const {parentId} = categories[id];
+  const ancestors = [];
+  if (parentId === null) {
+    return ancestors;
+  }
+  const siblings = categories[parentId].childrenIds
+    .filter((item) => item !== id);
+  if (siblings.every((sibling) => selectedIds.includes(sibling))) {
+    ancestors.push(parentId, ...getAncestors(categories, parentId, selectedIds));
+  }
+
+  return ancestors;
 }
 // function removeChildrenIds(categories, id, selectedIds, idsToExclude = []) {
 //     const { childrenIds } = categories[id];
@@ -34,34 +39,33 @@ function getAncestors(categories, id, selectedIds) {
 //     return selectedIds.filter(item => !idsToExclude.includes(item));
 // }
 
-export function CategoriesFilter({
-    categories,
-    selectedIds,
-    onChange
-}) {
-//   console.log(categories);
+export function CategoriesFilter({categories, selectedIds, onChange}) {
+  //   console.log(categories);
   function toggleId(id) {
     console.log(">>>", id);
     console.log(getAncestors(categories, id, selectedIds));
-    const idWithChildrenIds = [id, ...getChildrenIds(categories, id), ...getAncestors(categories, id, selectedIds)];
-    if(selectedIds.includes(id)) {
-        onChange(selectedIds.filter(item => !idWithChildrenIds.includes(item)));
-    } else{
-        onChange([...selectedIds, ...idWithChildrenIds]);
+    const idWithChildrenIds = [
+      id,
+      ...getDescendants(categories, id),
+      ...getAncestors(categories, id, selectedIds),
+    ];
+    if (selectedIds.includes(id)) {
+      onChange(selectedIds.filter((item) => !idWithChildrenIds.includes(item)));
+    } else {
+      onChange([...selectedIds, ...idWithChildrenIds]);
     }
   }
 
-  const topLevelIds = Object.keys(categories)
-    .filter(id => categories[id].parentId === null);
+  const topLevelIds = Object.keys(categories).filter(
+    (id) => categories[id].parentId === null
+  );
 
-    console.log(Object.keys(categories), {topLevelIds});
-
-    return (
-      <Categories 
-        categories={categories} 
-        ids={topLevelIds} 
-        selectedIds={selectedIds}
-        toggleId={toggleId}
-      />
-    )
+  return (
+    <Categories
+      categories={categories}
+      ids={topLevelIds}
+      selectedIds={selectedIds}
+      toggleId={toggleId}
+    />
+  );
 }
