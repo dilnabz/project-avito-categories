@@ -30,14 +30,7 @@ function getAncestors(categories, id, selectedIds) {
 
   return ancestors;
 }
-// function removeChildrenIds(categories, id, selectedIds, idsToExclude = []) {
-//     const { childrenIds } = categories[id];
-//     idsToExclude.push(...childrenIds, id);
-//     if(childrenIds.length !== 0) {
-//         childrenIds.forEach(childrenId => getChildrenIds(categories, childrenId, idsToExclude, selectedIds));
-//     }
-//     return selectedIds.filter(item => !idsToExclude.includes(item));
-// }
+
 
 export function CategoriesFilter({categories, selectedIds, onChange}) {
   //   console.log(categories);
